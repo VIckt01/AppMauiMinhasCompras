@@ -28,5 +28,10 @@ namespace AppMauiMinhasCompras.Helpers
             string sql = "SELECT * FROM Produto WHERE Descricao LIKE '%" + query + "%'";
             return _connection.QueryAsync<Produto>(sql);
         }
-    }
+        public Task<int> DeleteProdutoAsync(Produto p)
+        {
+            return _connection.DeleteAsync(p);
+        }
+    
+}
 }

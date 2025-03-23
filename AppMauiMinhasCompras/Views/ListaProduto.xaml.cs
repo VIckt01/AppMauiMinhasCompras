@@ -5,69 +5,70 @@ namespace AppMauiMinhasCompras.Views;
 
 public partial class ListaProduto : ContentPage
 {
-    // Lista para armazenar todos os produtos
-    private ObservableCollection<Produto> _todosProdutos;
-
-    // Lista filtrada que será exibida
-    public ObservableCollection<Produto> Produtos { get; set; }
+    ObservableCollection<Produto> lista = new ObservableCollection<Produto>();
 
     public ListaProduto()
     {
         InitializeComponent();
 
-        // Inicializar a lista de produtos
-        Produtos = new ObservableCollection<Produto>();
-        BindingContext = this;
-
-        // Carregar todos os produtos do banco de dados
-        CarregarProdutos();
+        listView.ItemsSource = lista;
     }
 
-    private async void CarregarProdutos()
+    protected async override void OnAppearing()
     {
-        // Carrega todos os produtos do banco de dados
-        var listaProdutos = await App.Db.GetAll();
-        _todosProdutos = new ObservableCollection<Produto>(listaProdutos);
+        List<Produto> tmp = await App.Db.GetAll();
 
-        // Exibir todos os produtos inicialmente
-        Produtos.Clear();
-        foreach (var produto in _todosProdutos)
+        tmp.ForEach(i => lista.Add(i));
+    }
+
+    private void ToolbarItem_Clicked(object sender, EventArgs e)
+    {
+        try
         {
-            Produtos.Add(produto);
+            Navigation.PushAsync(new Views.NovoProduto());
+
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert("Ops", ex.Message, "OK");
         }
     }
 
-    // Evento que é disparado quando o texto do SearchBar é alterado
-    private async void OnSearchBarTextChanged(object sender, TextChangedEventArgs e)
+    private async void txt_search_TextChanged(object sender, TextChangedEventArgs e)
     {
-        string textoBusca = e.NewTextValue?.ToLower() ?? "";  // Pega o texto inserido na SearchBar
+        string q = e.NewTextValue;
 
-        if (string.IsNullOrWhiteSpace(textoBusca))
-        {
-            // Se não houver texto, mostra todos os produtos
-            Produtos.Clear();
-            foreach (var produto in _todosProdutos)
-            {
-                Produtos.Add(produto);
-            }
-        }
-        else
-        {
-            // Filtra os produtos com base no texto da busca
-            var produtosFiltrados = await App.Db.Search(textoBusca);
+        lista.Clear();
 
-            // Atualiza a lista de produtos exibida
-            Produtos.Clear();
-            foreach (var produto in produtosFiltrados)
-            {
-                Produtos.Add(produto);
-            }
-        }
+        List<Produto> tmp = await App.Db.Search(q);
+
+        tmp.ForEach(i => lista.Add(i));
     }
 
     private void ToolbarItem_Clicked_1(object sender, EventArgs e)
     {
-        Navigation.PushAsync(new NovoProduto());
+        double soma = lista.Sum(i => i.Total);
+
+        string msg = $"O total é {soma:C}";
+
+        DisplayAlert("Total dos Produtos", msg, "OK");
+    }
+
+
+    private void MenuItem_Clicked_1(object sender, EventArgs e)
+    {
+        var menuItem = sender as MenuItem;
+        var produto = menuItem?.CommandParameter as Produto;
+
+        if (produto != null)
+        {
+            lista.Remove(produto);
+
+            // Remove o produto do banco de dados
+            App.Db.DeleteProdutoAsync(produto);  // Aqui está a remoção no banco, se necessário
+
+            // Exibe um alerta (opcional)
+            DisplayAlert("Produto Removido", $"O produto {produto.Descricao} foi removido.", "OK");
+        }
     }
 }
-

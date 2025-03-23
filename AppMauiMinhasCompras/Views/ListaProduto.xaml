@@ -4,28 +4,42 @@
              x:Class="AppMauiMinhasCompras.Views.ListaProduto"
              Title="Lista de Produtos">
 
-    <!-- Adicionar o ToolbarItem dentro da tag ContentPage -->
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Adicionar" 
-                     IconImageSource="add.png"
-                     Clicked="ToolbarItem_Clicked_1"/>
+        
+        <ToolbarItem Text="Somar" Clicked="ToolbarItem_Clicked_1" />
+        <ToolbarItem Text="Adicionar" Clicked="ToolbarItem_Clicked" />
     </ContentPage.ToolbarItems>
 
-    <StackLayout>
-        <!-- SearchBar para busca -->
-        <SearchBar x:Name="searchBar"
-                   Placeholder="Buscar produtos"
-                   TextChanged="OnSearchBarTextChanged"/>
-
-        <!-- ListView para exibir produtos -->
-        <ListView x:Name="listView"
-                  ItemsSource="{Binding Produtos}">
+    <VerticalStackLayout>
+        <SearchBar x:Name="txt_search" 
+                   Placeholder="Busca de Produtos"
+                   TextChanged="txt_search_TextChanged"/>
+        <ListView x:Name="listView">
+            <ListView.Header>
+                <Grid ColumnDefinitions="*, *, *, *, *, *">
+                    <Label Grid.Column="0" Text="ID" />
+                    <Label Grid.Column="1" Text="Descrição" />
+                    <Label Grid.Column="2" Text="Preço" />
+                    <Label Grid.Column="3" Text="Qnt" />
+                    <Label Grid.Column="4" Text="Total" />
+                </Grid>
+            </ListView.Header>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <TextCell Text="{Binding Descricao}"
-                              Detail="{Binding Preco}" />
+                    <ViewCell>
+                        <ViewCell.ContextActions>
+                            <MenuItem Text="Remover" Clicked="MenuItem_Clicked_1" CommandParameter="{Binding .}" />
+                        </ViewCell.ContextActions>
+                        <Grid ColumnDefinitions="*, *, *, *, *, *">
+                            <Label Grid.Column="0" Text="{Binding Id}" />
+                            <Label Grid.Column="1" Text="{Binding Descricao}" />
+                            <Label Grid.Column="2" Text="{Binding Preco}" />
+                            <Label Grid.Column="3" Text="{Binding Quantidade}" />
+                            <Label Grid.Column="4" Text="{Binding Total}" />
+                        </Grid>
+                    </ViewCell>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-    </StackLayout>
+    </VerticalStackLayout>
 </ContentPage>
