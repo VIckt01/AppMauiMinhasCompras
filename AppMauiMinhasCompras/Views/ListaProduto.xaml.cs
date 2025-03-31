@@ -55,7 +55,7 @@ public partial class ListaProduto : ContentPage
     }
 
 
-    private void MenuItem_Clicked_1(object sender, EventArgs e)
+    private async void MenuItem_Clicked_1(object sender, EventArgs e)
     {
         var menuItem = sender as MenuItem;
         var produto = menuItem?.CommandParameter as Produto;
@@ -64,11 +64,11 @@ public partial class ListaProduto : ContentPage
         {
             lista.Remove(produto);
 
-            // Remove o produto do banco de dados
-            App.Db.DeleteProdutoAsync(produto);  // Aqui está a remoção no banco, se necessário
+            // Remove o produto do banco de dados de forma assíncrona
+            await App.Db.Delete(produto.Id);  // Substitua por DeleteProdutoAsync se necessário
 
-            // Exibe um alerta (opcional)
-            DisplayAlert("Produto Removido", $"O produto {produto.Descricao} foi removido.", "OK");
+            // Exibe um alerta informando que o produto foi removido
+            await DisplayAlert("Produto Removido", $"O produto {produto.Descricao} foi removido.", "OK");
         }
     }
 }
