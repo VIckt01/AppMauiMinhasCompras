@@ -16,9 +16,18 @@ public partial class ListaProduto : ContentPage
 
     protected async override void OnAppearing()
     {
-        List<Produto> tmp = await App.Db.GetAll();
+        try
+        {
+            lista.Clear();
 
-        tmp.ForEach(i => lista.Add(i));
+            List<Produto> tmp = await App.Db.GetAll();
+
+            tmp.ForEach(i => lista.Add(i));
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Ops", ex.Message, "OK");
+        }
     }
 
     private void ToolbarItem_Clicked(object sender, EventArgs e)
@@ -36,13 +45,20 @@ public partial class ListaProduto : ContentPage
 
     private async void txt_search_TextChanged(object sender, TextChangedEventArgs e)
     {
-        string q = e.NewTextValue;
+        try
+        {
+            string q = e.NewTextValue;
 
-        lista.Clear();
+            lista.Clear();
 
-        List<Produto> tmp = await App.Db.Search(q);
+            List<Produto> tmp = await App.Db.Search(q);
 
-        tmp.ForEach(i => lista.Add(i));
+            tmp.ForEach(i => lista.Add(i));
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Ops", ex.Message, "OK");
+        }
     }
 
     private void ToolbarItem_Clicked_1(object sender, EventArgs e)
@@ -54,21 +70,43 @@ public partial class ListaProduto : ContentPage
         DisplayAlert("Total dos Produtos", msg, "OK");
     }
 
-
-    private async void MenuItem_Clicked_1(object sender, EventArgs e)
+    private async void MenuItem_Clicked(object sender, EventArgs e)
     {
-        var menuItem = sender as MenuItem;
-        var produto = menuItem?.CommandParameter as Produto;
-
-        if (produto != null)
+        try
         {
-            lista.Remove(produto);
+            MenuItem selecinado = sender as MenuItem;
 
-            // Remove o produto do banco de dados de forma assíncrona
-            await App.Db.Delete(produto.Id);  // Substitua por DeleteProdutoAsync se necessário
+            Produto p = selecinado.BindingContext as Produto;
 
-            // Exibe um alerta informando que o produto foi removido
-            await DisplayAlert("Produto Removido", $"O produto {produto.Descricao} foi removido.", "OK");
+            bool confirm = await DisplayAlert(
+                "Tem Certeza?", $"Remover {p.Descricao}?", "Sim", "Não");
+
+            if (confirm)
+            {
+                await App.Db.Delete(p.Id);
+                lista.Remove(p);
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Ops", ex.Message, "OK");
+        }
+    }
+
+    private void lst_produtos_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+    {
+        try
+        {
+            Produto p = e.SelectedItem as Produto;
+
+            Navigation.PushAsync(new Views.EditarProduto
+            {
+                BindingContext = p,
+            });
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert("Ops", ex.Message, "OK");
         }
     }
 }
