@@ -1,4 +1,6 @@
 using AppMauiMinhasCompras.Models;
+using Microsoft.Maui.Controls;
+using System;
 
 namespace AppMauiMinhasCompras.Views
 {
@@ -9,26 +11,45 @@ namespace AppMauiMinhasCompras.Views
             InitializeComponent();
         }
 
-        private async void ToolbarItem_Clicked(object sender, EventArgs e)
+        private async void SalvarProduto(object sender, EventArgs e)
         {
             try
             {
-                Produto p = new Produto
+                if (string.IsNullOrEmpty(txt_descricao.Text))
+                {
+                    await DisplayAlert("Erro", "Descrição não pode ser vazia!", "OK");
+                    return;
+                }
+
+                if (!double.TryParse(txt_quantidade.Text, out double quantidade))
+                {
+                    await DisplayAlert("Erro", "Quantidade inválida!", "OK");
+                    return;
+                }
+
+                if (!double.TryParse(txt_preco.Text, out double preco))
+                {
+                    await DisplayAlert("Erro", "Preço inválido!", "OK");
+                    return;
+                }
+
+                Produto produto = new Produto
                 {
                     Descricao = txt_descricao.Text,
-                    Quantidade = Convert.ToDouble(txt_quantidade.Text),
-                    Preco = Convert.ToDouble(txt_preco.Text),
+                    Quantidade = (int)quantidade,
+                    Preco = preco,
+                    Categoria = picker_categoria.SelectedItem.ToString()
                 };
 
-                await App.Db.insert(p);
-                await DisplayAlert("Sucesso!", "Produto Inserido", "OK");
-
-                await Navigation.PopAsync(); // Volta para a lista de produtos após adicionar
+                await App.Db.Insert(produto);
+                await DisplayAlert("Sucesso", "Produto adicionado com sucesso!", "OK");
+                await Navigation.PopAsync();
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Erro", ex.Message, "OK");
+                await DisplayAlert("Erro", $"Erro: {ex.Message}", "OK");
             }
         }
     }
 }
+

@@ -1,33 +1,31 @@
-﻿using AppMauiMinhasCompras.Helpers;
+﻿using Microsoft.Maui.Controls;
+using System;
+using System.IO;
 
 namespace AppMauiMinhasCompras
 {
     public partial class App : Application
     {
-        static SQLiteDatabaseHelpers _db;
+        static AppDatabase database;
 
-        public static SQLiteDatabaseHelpers Db
+        public static AppDatabase Db
         {
-
             get
             {
-                if (_db == null)
+                if (database == null)
                 {
-                    string path = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "banco_sqlite_compras.db3");
-
-                    _db = new SQLiteDatabaseHelpers(path);
+                    var dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "produtos.db3");
+                    database = new AppDatabase(dbPath);
                 }
-
-                return _db;
+                return database;
             }
         }
+
         public App()
         {
             InitializeComponent();
-
-            //MainPage = new AppShell();
             MainPage = new NavigationPage(new Views.ListaProduto());
         }
     }
 }
+
